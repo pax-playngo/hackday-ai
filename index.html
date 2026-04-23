@@ -3,134 +3,441 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lock In Timer</title>
+  <title>Lock and Key Task Tracker</title>
   <style>
     :root {
       color-scheme: light;
-      --bg: #fff;
-      --fg: #000;
-      --muted: #555;
+      --bg: #f3f5ef;
+      --panel: #fffdf8;
+      --ink: #1b1b1b;
+      --muted: #565656;
+      --gold: #c89b2d;
+      --gold-deep: #9f7b21;
+      --green: #29583f;
+      --red: #8e2f22;
+      --ring: #e6dcc1;
     }
 
     * {
       box-sizing: border-box;
-      font-family: "Arial", sans-serif;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: var(--bg);
-      color: var(--fg);
+      padding: 1.25rem;
+      background:
+        radial-gradient(circle at 12% 15%, #fff7d6 0%, transparent 34%),
+        radial-gradient(circle at 88% 80%, #f0dfac 0%, transparent 32%),
+        linear-gradient(150deg, #f7f1de 0%, #eadfbf 55%, #ded3ad 100%);
+      color: var(--ink);
     }
 
-    .timer-card {
-      width: min(92vw, 420px);
-      border: 3px solid var(--fg);
-      border-radius: 20px;
-      padding: 1.5rem;
-      text-align: center;
-      box-shadow: 8px 8px 0 var(--fg);
+    .tracker-card {
+      width: min(96vw, 960px);
+      margin: 0 auto;
+      border: 3px solid var(--ink);
+      border-radius: 24px;
+      padding: 1.25rem;
+      background: var(--panel);
+      box-shadow: 10px 10px 0 var(--ink);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      border: 2px solid var(--ink);
+      border-radius: 16px;
+      background: #f7efd6;
     }
 
     h1 {
-      margin: 0 0 1rem;
-      font-size: 1.6rem;
+      margin: 0;
+      font-size: 1.45rem;
       letter-spacing: 0.04em;
     }
 
-    .theme-icon {
-      font-size: 2.2rem;
-      line-height: 1;
-      margin-bottom: 0.75rem;
-    }
-
-    .task-row {
-      display: grid;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-      text-align: left;
-    }
-
-    label {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    input {
-      width: 100%;
-      border: 2px solid var(--fg);
-      border-radius: 10px;
-      padding: 0.6rem 0.75rem;
-      font-size: 1rem;
-    }
-
-    .time {
-      margin: 0.8rem 0 1.2rem;
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-    }
-
-    .task-status {
-      min-height: 1.2rem;
-      margin: 0;
+    .theme-line {
+      margin: 0.25rem 0 0;
       color: var(--muted);
       font-size: 0.95rem;
     }
 
-    .circle-btn {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      border: 4px solid var(--fg);
-      background: var(--bg);
-      color: var(--fg);
-      font-size: 1.05rem;
+    .theme-icons {
+      font-size: 1.9rem;
+      line-height: 1;
+      letter-spacing: 0.1em;
+    }
+
+    .creator {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .io-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .io-btn {
+      background: #f4ebcd;
+      border-color: var(--gold-deep);
+    }
+
+    input {
+      width: 100%;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      font-size: 1rem;
+      background: #fffef8;
+    }
+
+    input:focus {
+      outline: 3px solid var(--ring);
+      outline-offset: 2px;
+    }
+
+    button {
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 0.7rem 0.95rem;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.15s ease;
+      background: #fff;
+      color: var(--ink);
     }
 
-    .circle-btn:active {
-      transform: scale(0.97);
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
-    .circle-btn.running {
-      background: var(--fg);
-      color: var(--bg);
+    .add-btn {
+      background: var(--gold);
+      border-color: var(--gold-deep);
+      min-width: 130px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .summary-item {
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 0.7rem;
+      background: #fffef8;
+      text-align: center;
+    }
+
+    .summary-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .empty {
+      border: 2px dashed var(--ink);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .task-list {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .task-item {
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      padding: 0.8rem;
+      background: #fffdf7;
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .task-item.running {
+      background: #f4ecd2;
+      box-shadow: 0 0 0 3px var(--ring) inset;
+    }
+
+    .task-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .task-name {
+      margin: 0;
+      font-size: 1.05rem;
+      word-break: break-word;
+    }
+
+    .task-clock {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .time-log {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+      font-size: 0.9rem;
+    }
+
+    .stamp {
+      border: 1px solid var(--ink);
+      border-radius: 10px;
+      padding: 0.55rem;
+      background: #fff;
+    }
+
+    .stamp strong {
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 0.5rem;
+    }
+
+    .start-btn {
+      background: #e8f3ec;
+      border-color: var(--green);
+      color: #163524;
+    }
+
+    .stop-btn {
+      background: #f9e9e7;
+      border-color: var(--red);
+      color: #4d1b14;
+    }
+
+    .delete-btn {
+      min-width: 42px;
+      padding-left: 0.55rem;
+      padding-right: 0.55rem;
+    }
+
+    .sessions-wrap {
+      border-top: 1px solid #c8bea1;
+      padding-top: 0.55rem;
+    }
+
+    .sessions-label {
+      margin: 0 0 0.3rem;
+      font-size: 0.83rem;
+      color: var(--muted);
+    }
+
+    .sessions-list {
+      margin: 0;
+      padding-left: 1rem;
+      display: grid;
+      gap: 0.2rem;
+      font-size: 0.85rem;
+    }
+
+    .sessions-list li {
+      font-family: "Consolas", "Courier New", monospace;
+    }
+
+    @media (max-width: 640px) {
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .creator {
+        grid-template-columns: 1fr;
+      }
+
+      .io-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .add-btn {
+        width: 100%;
+      }
+
+      .time-log {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .delete-btn {
+        min-width: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="timer-card">
-    <div class="theme-icon" aria-hidden="true">🔒🗝️</div>
-    <h1>Lock In Timer</h1>
+  <main class="tracker-card">
+    <section class="header">
+      <div>
+        <h1>Lock and Key Task Tracker</h1>
+        <p class="theme-line">Track many tasks. Lock focus with start, unlock with stop.</p>
+      </div>
+      <div class="theme-icons" aria-hidden="true">🔒 🗝️ 🔐</div>
+    </section>
 
-    <div class="task-row">
-      <label for="taskInput">Task</label>
-      <input id="taskInput" type="text" placeholder="What are you working on?" maxlength="80" />
-    </div>
+    <section class="creator">
+      <input id="taskInput" type="text" placeholder="Add a task to lock in..." maxlength="100" />
+      <button id="addTaskButton" class="add-btn" type="button">+ Add Task</button>
+    </section>
 
-    <p id="taskStatus" class="task-status">No task in focus</p>
-    <p id="timeDisplay" class="time" aria-live="polite">00:00:00</p>
+    <section class="io-controls">
+      <button id="exportButton" class="io-btn" type="button">Export JSON</button>
+      <button id="importButton" class="io-btn" type="button">Import JSON</button>
+      <input id="importFileInput" type="file" accept="application/json" hidden />
+    </section>
 
-    <button id="toggleButton" class="circle-btn" type="button" aria-pressed="false">START</button>
+    <section class="summary" aria-live="polite">
+      <article class="summary-item">
+        <span class="summary-label">Total Tasks</span>
+        <strong class="summary-value" id="taskCount">0</strong>
+      </article>
+      <article class="summary-item">
+        <span class="summary-label">Total Tracked Time</span>
+        <strong class="summary-value" id="totalTracked">00:00:00</strong>
+      </article>
+    </section>
+
+    <section id="taskList" class="task-list" aria-live="polite">
+      <p class="empty">No tasks yet. Add one and press Start to lock in.</p>
+    </section>
   </main>
 
+  <template id="taskTemplate">
+    <article class="task-item">
+      <div class="task-top">
+        <h2 class="task-name"></h2>
+        <div class="task-clock">00:00:00</div>
+      </div>
+
+      <div class="time-log">
+        <div class="stamp">
+          <strong>Last Start</strong>
+          <span class="last-start">--:--:--</span>
+        </div>
+        <div class="stamp">
+          <strong>Last Stop</strong>
+          <span class="last-stop">--:--:--</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="start-btn" type="button">🔒 Start</button>
+        <button class="stop-btn" type="button" disabled>🗝️ Stop</button>
+        <button class="delete-btn" type="button" title="Delete task">✕</button>
+      </div>
+
+      <div class="sessions-wrap">
+        <p class="sessions-label">Sessions</p>
+        <ul class="sessions-list"></ul>
+      </div>
+    </article>
+  </template>
+
   <script>
-    const toggleButton = document.getElementById("toggleButton");
-    const timeDisplay = document.getElementById("timeDisplay");
     const taskInput = document.getElementById("taskInput");
-    const taskStatus = document.getElementById("taskStatus");
+    const addTaskButton = document.getElementById("addTaskButton");
+    const taskList = document.getElementById("taskList");
+    const taskTemplate = document.getElementById("taskTemplate");
+    const taskCount = document.getElementById("taskCount");
+    const totalTracked = document.getElementById("totalTracked");
+    const exportButton = document.getElementById("exportButton");
+    const importButton = document.getElementById("importButton");
+    const importFileInput = document.getElementById("importFileInput");
 
-    let timerId = null;
-    let startTime = null;
-    let elapsedMs = 0;
+    const STORAGE_KEY = "lock-key-task-tracker-v1";
+    const tasks = [];
 
-    function formatTime(ms) {
+    function normalizeTaskRecords(input) {
+      if (!Array.isArray(input)) {
+        return [];
+      }
+
+      return input
+        .filter((item) => item && typeof item.name === "string")
+        .map((item) => ({
+          id: Number.isFinite(item.id) ? item.id : Date.now() + Math.floor(Math.random() * 1000),
+          name: item.name.slice(0, 100),
+          accumulatedMs: Number.isFinite(item.accumulatedMs) ? Math.max(0, item.accumulatedMs) : 0,
+          runningSince: Number.isFinite(item.runningSince) ? item.runningSince : null,
+          lastStartAt: Number.isFinite(item.lastStartAt) ? item.lastStartAt : null,
+          lastStopAt: Number.isFinite(item.lastStopAt) ? item.lastStopAt : null,
+          sessions: Array.isArray(item.sessions)
+            ? item.sessions
+                .filter((session) => session && Number.isFinite(session.start) && Number.isFinite(session.stop) && Number.isFinite(session.durationMs))
+                .map((session) => ({
+                  start: session.start,
+                  stop: session.stop,
+                  durationMs: Math.max(0, session.durationMs),
+                }))
+            : [],
+        }));
+    }
+
+    function loadTasksFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return [];
+        }
+        const parsed = JSON.parse(raw);
+        return normalizeTaskRecords(parsed);
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTasksToStorage() {
+      const serializable = tasks.map((task) => ({
+        id: task.id,
+        name: task.name,
+        accumulatedMs: task.accumulatedMs,
+        runningSince: task.runningSince,
+        lastStartAt: task.lastStartAt,
+        lastStopAt: task.lastStopAt,
+        sessions: task.sessions,
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
+    }
+
+    function formatElapsed(ms) {
       const totalSeconds = Math.floor(ms / 1000);
       const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
       const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
@@ -138,47 +445,282 @@
       return `${hours}:${minutes}:${seconds}`;
     }
 
-    function renderTime() {
-      const currentElapsed = startTime ? elapsedMs + (Date.now() - startTime) : elapsedMs;
-      timeDisplay.textContent = formatTime(currentElapsed);
-    }
-
-    function updateTaskStatus() {
-      const taskName = taskInput.value.trim();
-      taskStatus.textContent = taskName ? `Focused on: ${taskName}` : "No task in focus";
-    }
-
-    function startTimer() {
-      startTime = Date.now();
-      toggleButton.textContent = "STOP";
-      toggleButton.classList.add("running");
-      toggleButton.setAttribute("aria-pressed", "true");
-      updateTaskStatus();
-      timerId = setInterval(renderTime, 1000);
-    }
-
-    function stopTimer() {
-      if (startTime) {
-        elapsedMs += Date.now() - startTime;
+    function formatStamp(dateValue) {
+      if (!dateValue) {
+        return "--:--:--";
       }
-      startTime = null;
-      clearInterval(timerId);
-      timerId = null;
-      renderTime();
-      toggleButton.textContent = "START";
-      toggleButton.classList.remove("running");
-      toggleButton.setAttribute("aria-pressed", "false");
+      return new Date(dateValue).toLocaleTimeString([], {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
     }
 
-    toggleButton.addEventListener("click", () => {
-      if (timerId) {
-        stopTimer();
-      } else {
-        startTimer();
+    function refreshSummary() {
+      taskCount.textContent = String(tasks.length);
+      const total = tasks.reduce((sum, task) => {
+        const runningMs = task.runningSince ? Date.now() - task.runningSince : 0;
+        return sum + task.accumulatedMs + runningMs;
+      }, 0);
+      totalTracked.textContent = formatElapsed(total);
+    }
+
+    function updateTaskVisual(task) {
+      const runningMs = task.runningSince ? Date.now() - task.runningSince : 0;
+      task.clock.textContent = formatElapsed(task.accumulatedMs + runningMs);
+      task.lastStart.textContent = formatStamp(task.lastStartAt);
+      task.lastStop.textContent = formatStamp(task.lastStopAt);
+      task.startButton.disabled = Boolean(task.runningSince);
+      task.stopButton.disabled = !task.runningSince;
+      task.element.classList.toggle("running", Boolean(task.runningSince));
+      refreshSummary();
+    }
+
+    function renderSessions(task) {
+      task.sessionsList.innerHTML = "";
+      if (task.sessions.length === 0) {
+        const item = document.createElement("li");
+        item.textContent = "No completed sessions yet";
+        task.sessionsList.append(item);
+        return;
+      }
+
+      for (const session of task.sessions.slice(-5).reverse()) {
+        const item = document.createElement("li");
+        item.textContent = `${formatStamp(session.start)} -> ${formatStamp(session.stop)} (${formatElapsed(session.durationMs)})`;
+        task.sessionsList.append(item);
+      }
+    }
+
+    function startTask(task) {
+      if (task.runningSince) {
+        return;
+      }
+      task.runningSince = Date.now();
+      task.lastStartAt = task.runningSince;
+      updateTaskVisual(task);
+      saveTasksToStorage();
+    }
+
+    function stopTask(task) {
+      if (!task.runningSince) {
+        return;
+      }
+      const end = Date.now();
+      const durationMs = end - task.runningSince;
+      task.accumulatedMs += durationMs;
+      task.lastStopAt = end;
+      task.sessions.push({
+        start: task.runningSince,
+        stop: end,
+        durationMs,
+      });
+      task.runningSince = null;
+      renderSessions(task);
+      updateTaskVisual(task);
+      saveTasksToStorage();
+    }
+
+    function renderEmptyStateIfNeeded() {
+      if (tasks.length === 0) {
+        taskList.innerHTML = '<p class="empty">No tasks yet. Add one and press Start to lock in.</p>';
+      }
+    }
+
+    function replaceAllTasks(records) {
+      tasks.splice(0, tasks.length);
+      taskList.innerHTML = "";
+
+      for (const record of normalizeTaskRecords(records)) {
+        tasks.push(createTask(record));
+      }
+
+      renderEmptyStateIfNeeded();
+      refreshSummary();
+      saveTasksToStorage();
+    }
+
+    function exportTasksAsJson() {
+      const payload = {
+        version: 1,
+        exportedAt: Date.now(),
+        tasks: tasks.map((task) => ({
+          id: task.id,
+          name: task.name,
+          accumulatedMs: task.accumulatedMs,
+          runningSince: task.runningSince,
+          lastStartAt: task.lastStartAt,
+          lastStopAt: task.lastStopAt,
+          sessions: task.sessions,
+        })),
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.href = url;
+      anchor.download = `lock-key-task-tracker-${stamp}.json`;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importTasksFromFile(file) {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const sourceRecords = Array.isArray(parsed) ? parsed : parsed.tasks;
+      const normalized = normalizeTaskRecords(sourceRecords);
+      if (normalized.length === 0) {
+        alert("Imported file has no valid tasks.");
+        return;
+      }
+      replaceAllTasks(normalized);
+    }
+
+    function deleteTask(taskId) {
+      const index = tasks.findIndex((task) => task.id === taskId);
+      if (index === -1) {
+        return;
+      }
+      const [task] = tasks.splice(index, 1);
+      task.element.remove();
+      renderEmptyStateIfNeeded();
+      refreshSummary();
+      saveTasksToStorage();
+    }
+
+    function createTask(record) {
+      const fragment = taskTemplate.content.cloneNode(true);
+      const element = fragment.querySelector(".task-item");
+      const nameNode = fragment.querySelector(".task-name");
+      const clock = fragment.querySelector(".task-clock");
+      const lastStart = fragment.querySelector(".last-start");
+      const lastStop = fragment.querySelector(".last-stop");
+      const startButton = fragment.querySelector(".start-btn");
+      const stopButton = fragment.querySelector(".stop-btn");
+      const deleteButton = fragment.querySelector(".delete-btn");
+      const sessionsList = fragment.querySelector(".sessions-list");
+
+      const task = {
+        id: record.id,
+        name: record.name,
+        accumulatedMs: record.accumulatedMs,
+        runningSince: record.runningSince,
+        lastStartAt: record.lastStartAt,
+        lastStopAt: record.lastStopAt,
+        sessions: record.sessions,
+        element,
+        clock,
+        lastStart,
+        lastStop,
+        startButton,
+        stopButton,
+        sessionsList,
+      };
+
+      nameNode.textContent = task.name;
+      startButton.addEventListener("click", () => startTask(task));
+      stopButton.addEventListener("click", () => stopTask(task));
+      deleteButton.addEventListener("click", () => deleteTask(task.id));
+
+      taskList.append(fragment);
+      renderSessions(task);
+      updateTaskVisual(task);
+
+      return task;
+    }
+
+    function hydrateTasks() {
+      const savedTasks = loadTasksFromStorage();
+      if (savedTasks.length === 0) {
+        refreshSummary();
+        return;
+      }
+
+      taskList.innerHTML = "";
+      for (const saved of savedTasks) {
+        tasks.push(createTask(saved));
+      }
+      refreshSummary();
+    }
+
+    function addTask() {
+      const name = taskInput.value.trim();
+      if (!name) {
+        taskInput.focus();
+        return;
+      }
+
+      if (taskList.querySelector(".empty")) {
+        taskList.innerHTML = "";
+      }
+
+      const task = createTask({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        name,
+        accumulatedMs: 0,
+        runningSince: null,
+        lastStartAt: null,
+        lastStopAt: null,
+        sessions: [],
+      });
+
+      tasks.push(task);
+      saveTasksToStorage();
+
+      taskInput.value = "";
+      taskInput.focus();
+    }
+
+    addTaskButton.addEventListener("click", addTask);
+    exportButton.addEventListener("click", exportTasksAsJson);
+    importButton.addEventListener("click", () => {
+      importFileInput.click();
+    });
+
+    importFileInput.addEventListener("change", async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) {
+        return;
+      }
+
+      if (tasks.length > 0) {
+        const shouldOverwrite = window.confirm(
+          "Importing will replace your current tasks. Do you want to continue?"
+        );
+        if (!shouldOverwrite) {
+          importFileInput.value = "";
+          return;
+        }
+      }
+
+      try {
+        await importTasksFromFile(file);
+      } catch {
+        alert("Could not import file. Please use a valid JSON export.");
+      } finally {
+        importFileInput.value = "";
       }
     });
 
-    taskInput.addEventListener("input", updateTaskStatus);
+    taskInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        addTask();
+      }
+    });
+
+    setInterval(() => {
+      for (const task of tasks) {
+        if (task.runningSince) {
+          updateTaskVisual(task);
+        }
+      }
+    }, 1000);
+
+    hydrateTasks();
   </script>
 </body>
 </html>
