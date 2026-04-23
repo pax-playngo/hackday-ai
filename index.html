@@ -7,15 +7,15 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f3f5ef;
-      --panel: #fffdf8;
-      --ink: #1b1b1b;
-      --muted: #565656;
-      --gold: #c89b2d;
-      --gold-deep: #9f7b21;
-      --green: #29583f;
-      --red: #8e2f22;
-      --ring: #e6dcc1;
+      --bg: #eef3ff;
+      --panel: #fdfdff;
+      --ink: #171a2b;
+      --muted: #4c5576;
+      --gold: #2d63c8;
+      --gold-deep: #1f4aa1;
+      --green: #2a5acb;
+      --red: #c23b49;
+      --ring: #cfdcff;
     }
 
     * {
@@ -28,9 +28,9 @@
       min-height: 100vh;
       padding: 1.25rem;
       background:
-        radial-gradient(circle at 12% 15%, #fff7d6 0%, transparent 34%),
-        radial-gradient(circle at 88% 80%, #f0dfac 0%, transparent 32%),
-        linear-gradient(150deg, #f7f1de 0%, #eadfbf 55%, #ded3ad 100%);
+        radial-gradient(circle at 12% 15%, #ffd4df 0%, transparent 34%),
+        radial-gradient(circle at 88% 80%, #d8e3ff 0%, transparent 32%),
+        linear-gradient(150deg, #f6d7df 0%, #d8e4ff 55%, #c8d6ff 100%);
       color: var(--ink);
     }
 
@@ -53,7 +53,7 @@
       padding: 0.75rem;
       border: 2px solid var(--ink);
       border-radius: 16px;
-      background: #f7efd6;
+      background: #e8efff;
     }
 
     h1 {
@@ -89,7 +89,7 @@
     }
 
     .io-btn {
-      background: #f4ebcd;
+      background: #e9efff;
       border-color: var(--gold-deep);
     }
 
@@ -99,7 +99,7 @@
       border-radius: 12px;
       padding: 0.75rem 0.85rem;
       font-size: 1rem;
-      background: #fffef8;
+      background: #f9fbff;
     }
 
     input:focus {
@@ -139,7 +139,7 @@
       border: 2px solid var(--ink);
       border-radius: 12px;
       padding: 0.7rem;
-      background: #fffef8;
+      background: #f9fbff;
       text-align: center;
     }
 
@@ -173,13 +173,13 @@
       border: 2px solid var(--ink);
       border-radius: 14px;
       padding: 0.8rem;
-      background: #fffdf7;
+      background: #f9fbff;
       display: grid;
       gap: 0.65rem;
     }
 
     .task-item.running {
-      background: #f4ecd2;
+      background: #eaf0ff;
       box-shadow: 0 0 0 3px var(--ring) inset;
     }
 
@@ -231,15 +231,15 @@
     }
 
     .start-btn {
-      background: #e8f3ec;
+      background: #e6f6ea;
       border-color: var(--green);
-      color: #163524;
+      color: #14522a;
     }
 
     .stop-btn {
-      background: #f9e9e7;
+      background: #ffe7eb;
       border-color: var(--red);
-      color: #4d1b14;
+      color: #6d1222;
     }
 
     .delete-btn {
@@ -249,7 +249,7 @@
     }
 
     .sessions-wrap {
-      border-top: 1px solid #c8bea1;
+      border-top: 1px solid #b9c8f8;
       padding-top: 0.55rem;
     }
 
@@ -268,7 +268,31 @@
     }
 
     .sessions-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.45rem;
       font-family: "Consolas", "Courier New", monospace;
+    }
+
+    .session-text {
+      overflow-wrap: anywhere;
+    }
+
+    .session-actions {
+      display: inline-flex;
+      gap: 0.3rem;
+      flex-shrink: 0;
+    }
+
+    .session-btn {
+      border: 1px solid var(--ink);
+      border-radius: 8px;
+      background: #fff;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.72rem;
+      line-height: 1.2;
+      cursor: pointer;
     }
 
     @media (max-width: 640px) {
@@ -307,7 +331,7 @@
   <main class="tracker-card">
     <section class="header">
       <div>
-        <h1>Lock and Key Task Tracker</h1>
+        <h1>You Hold the Key</h1>
         <p class="theme-line">Track many tasks. Lock focus with start, unlock with stop.</p>
       </div>
       <div class="theme-icons" aria-hidden="true">🔒 🗝️ 🔐</div>
@@ -359,8 +383,8 @@
       </div>
 
       <div class="controls">
-        <button class="start-btn" type="button">🔒 Start</button>
-        <button class="stop-btn" type="button" disabled>🗝️ Stop</button>
+        <button class="start-btn" type="button">🔑 Start</button>
+        <button class="stop-btn" type="button" disabled>🔒 Stop</button>
         <button class="delete-btn" type="button" title="Delete task">✕</button>
       </div>
 
@@ -457,6 +481,33 @@
       });
     }
 
+    function formatDateTimeForEdit(ms) {
+      if (!Number.isFinite(ms)) {
+        return "";
+      }
+      const date = new Date(ms);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const seconds = String(date.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    function parseEditableDateTime(value) {
+      if (typeof value !== "string") {
+        return NaN;
+      }
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return NaN;
+      }
+      const normalized = trimmed.includes("T") ? trimmed : trimmed.replace(" ", "T");
+      const parsed = Date.parse(normalized);
+      return Number.isFinite(parsed) ? parsed : NaN;
+    }
+
     function refreshSummary() {
       taskCount.textContent = String(tasks.length);
       const total = tasks.reduce((sum, task) => {
@@ -477,6 +528,92 @@
       refreshSummary();
     }
 
+    function recomputeTaskAccumulated(task) {
+      task.accumulatedMs = task.sessions.reduce(
+        (sum, session) => sum + Math.max(0, session.durationMs),
+        0
+      );
+    }
+
+    function syncTaskSessionStamps(task) {
+      if (task.runningSince) {
+        task.lastStartAt = task.runningSince;
+        return;
+      }
+      if (task.sessions.length === 0) {
+        task.lastStartAt = null;
+        task.lastStopAt = null;
+        return;
+      }
+      const latest = task.sessions[task.sessions.length - 1];
+      task.lastStartAt = latest.start;
+      task.lastStopAt = latest.stop;
+    }
+
+    function editSession(task, sessionIndex) {
+      const session = task.sessions[sessionIndex];
+      if (!session) {
+        return;
+      }
+
+      const editedStart = window.prompt(
+        "Edit session START (YYYY-MM-DD HH:mm:ss)",
+        formatDateTimeForEdit(session.start)
+      );
+      if (editedStart === null) {
+        return;
+      }
+
+      const editedStop = window.prompt(
+        "Edit session STOP (YYYY-MM-DD HH:mm:ss)",
+        formatDateTimeForEdit(session.stop)
+      );
+      if (editedStop === null) {
+        return;
+      }
+
+      const parsedStart = parseEditableDateTime(editedStart);
+      const parsedStop = parseEditableDateTime(editedStop);
+
+      if (!Number.isFinite(parsedStart) || !Number.isFinite(parsedStop)) {
+        alert("Please use a valid date format like YYYY-MM-DD HH:mm:ss.");
+        return;
+      }
+
+      if (parsedStop <= parsedStart) {
+        alert("Stop time must be later than start time.");
+        return;
+      }
+
+      session.start = parsedStart;
+      session.stop = parsedStop;
+      session.durationMs = parsedStop - parsedStart;
+      recomputeTaskAccumulated(task);
+      syncTaskSessionStamps(task);
+      renderSessions(task);
+      updateTaskVisual(task);
+      saveTasksToStorage();
+    }
+
+    function deleteSession(task, sessionIndex) {
+      const session = task.sessions[sessionIndex];
+      if (!session) {
+        return;
+      }
+
+      const confirmed = window.confirm("Delete this session?");
+      if (!confirmed) {
+        return;
+      }
+
+      task.sessions.splice(sessionIndex, 1);
+      recomputeTaskAccumulated(task);
+      syncTaskSessionStamps(task);
+      renderSessions(task);
+      updateTaskVisual(task);
+      saveTasksToStorage();
+    }
+
     function renderSessions(task) {
       task.sessionsList.innerHTML = "";
       if (task.sessions.length === 0) {
@@ -486,9 +623,31 @@
         return;
       }
 
-      for (const session of task.sessions.slice(-5).reverse()) {
+      const sessionsToShow = task.sessions.slice(-5).reverse();
+      for (const session of sessionsToShow) {
+        const sessionIndex = task.sessions.lastIndexOf(session);
         const item = document.createElement("li");
-        item.textContent = `${formatStamp(session.start)} -> ${formatStamp(session.stop)} (${formatElapsed(session.durationMs)})`;
+        const text = document.createElement("span");
+        text.className = "session-text";
+        text.textContent = `${formatStamp(session.start)} -> ${formatStamp(session.stop)} (${formatElapsed(session.durationMs)})`;
+
+        const actions = document.createElement("span");
+        actions.className = "session-actions";
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "session-btn";
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => editSession(task, sessionIndex));
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "session-btn";
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => deleteSession(task, sessionIndex));
+
+        actions.append(editButton, deleteButton);
+        item.append(text, actions);
         task.sessionsList.append(item);
       }
     }
